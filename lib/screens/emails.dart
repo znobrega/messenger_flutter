@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import './new_email.dart';
+import '../models/chat.dart';
 import './messages.dart';
 import '../models/user.dart';
 
@@ -14,8 +15,13 @@ import 'package:http/http.dart' as http;
 
 class Emails extends StatefulWidget {
 
-  final User _currentUser;
-  Emails(this._currentUser);
+  final String _name;
+  final String _nickname;
+  User _currentUser;
+  Emails(this._name, this._nickname) {
+    _currentUser = User(_name, _nickname, []);
+  }
+
   @override
   State<StatefulWidget> createState() => _EmailsState(_currentUser);
 }
@@ -23,56 +29,28 @@ class Emails extends StatefulWidget {
 class _EmailsState extends State<Emails> {
   //String date = DateFormat.Hm().format(DateTime.now());
   final User _currentUserState;
+  //final String _nameState;
+  //final String _nicknameState;
   _EmailsState(this._currentUserState);
   int listCount;
+
 
   Map<String, dynamic> allData = {
     "username": "Carlos",
     "emails": [],
   };
 
-  getEmails() async {
-          HttpClient httpClient = new HttpClient()
-        ..badCertificateCallback =
-        ((X509Certificate cert, String host, int port) {
-          print("CERTIFICADO HTTP");
-          // tests that cert is self signed, correct subject and correct date(s)
-          return true;
-        });
-
-      IOClient ioClient = new IOClient(httpClient);
-      var urlGetList = 'https://192.168.0.39:8443/chat/getlist';
-
-      var getList = Map<String, dynamic>();
-    
-      getList['nickname'] = widget._currentUser.nickname;
-
-      print("clicked");
-      ioClient
-          .get(
-            urlGetList,
-            headers: {"Accept": "application/json"},)
-            // PROBLEM
-            //body: getList)
-          .then((response) {
-            print("Signup:");
-            print('Response: ${response.statusCode}  Body:${response.body} ');
-
-            Map result = JSON.jsonDecode(response.body);
-            print("Map:   $result");
-        })
-          .catchError((err) {
-        print(err.toString());
-        print('deu ruim');
-            ioClient.close();
-
-      });
-  }
-    
+  
   @override
   Widget build(BuildContext context) {
     debugPrint("USUARIO");
-    debugPrint(_currentUserState.nickname);
+      if (_currentUserState == null) {
+        debugPrint("No user");
+      } else {
+        debugPrint(_currentUserState.name);
+        debugPrint(_currentUserState.nickname);
+        getEmails();
+      }
     return Scaffold(
       appBar: AppBar(
         title: Text("Email list"),
@@ -126,7 +104,7 @@ class _EmailsState extends State<Emails> {
     int listSize = listEmailsCount(allData["emails"]);
 
     if(listSize == 0) {
-      return Center(child: Text("Você não possui emails"),);
+      return Center(child: Text("Você não possui mensagens", style: TextStyle(color: Colors.black),),);
     }
     return  ListView.builder(
       itemCount: listSize,
@@ -164,17 +142,18 @@ class _EmailsState extends State<Emails> {
     return emails.length;
   }
 
+  // Using that one
   Widget listEmailUser() {
     int listSize = listEmailsCount(_currentUserState.chats);
 
     if(listSize == 0) {
-      return Center(child: Text("Você não possui emails"),);
+      return Center(child: Text("Caixa de entrada vazia", style: TextStyle(color: Colors.black54)));
     }
     return  ListView.builder(
       itemCount: listSize,
       itemBuilder: (BuildContext context, int position) {
         
-        String to = _currentUserState.chats[position].to.username;
+        String to = _currentUserState.chats[position].to.nickname;
         debugPrint(to);
         return Card(
           color: Colors.white,
@@ -198,4 +177,42 @@ class _EmailsState extends State<Emails> {
       },
     );
   }
+
+  void getEmails() async {
+          HttpClient httpClient = new HttpClient()
+        ..badCertificateCallback =
+        ((X509Certificate cert, String host, int port) {
+          print("CERTIFICADO HTTP");
+          // tests that cert is self signed, correct subject and correct date(s)
+          return true;
+        });
+
+      IOClient ioClient = new IOClient(httpClient);
+      var urlGetList = 'https://192.168.0.39:8443/chat/getlist';
+
+      var getList = Map<String, dynamic>();
+    
+      getList['nickname'] = _currentUserState.nickname;
+
+      print("clicked");
+      ioClient
+          .get(
+            urlGetList,
+            headers: {"Accept": "application/json"},)
+            // GET isnt accepting a body
+            //body: getList)
+          .then((response) {
+            print("getList:");
+            print('Response: ${response.statusCode}  Body:${response.body} ');
+
+            Map result = JSON.jsonDecode(response.body);
+            print("Map:   $result");
+        })
+          .catchError((err) {
+            print(err.toString());
+            print('deu ruim');
+            ioClient.close();
+
+      });
+    }
 }

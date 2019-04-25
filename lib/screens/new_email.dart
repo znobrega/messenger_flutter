@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'dart:io';
+import 'package:http/io_client.dart';
+import 'dart:convert' as JSON;
 
 import '../models/user.dart';
 import '../models/chat.dart';
@@ -170,4 +172,53 @@ class _NewEmailState extends State<NewEmail> {
     }
     _currentUser.addChat(Chat(_currentUser,_currentUser, subject, [], date, message));
   }  
+
+  void createChat(String to , String subject, String message) async {
+          HttpClient httpClient = new HttpClient()
+        ..badCertificateCallback =
+        ((X509Certificate cert, String host, int port) {
+          print("CERTIFICADO HTTP");
+          // tests that cert is self signed, correct subject and correct date(s)
+          return true;
+        });
+
+      IOClient ioClient = new IOClient(httpClient);
+      var urlCreateChat = 'https://192.168.0.39:8443/chat/create';
+
+
+      Map<String, dynamic> newChat = {
+        "subject": subject,
+        "creator_nickname": _currentUser.nickname, 
+        "destination_nickneme": to, 
+      };
+
+    
+      print("clicked");
+      ioClient
+          .post(
+            urlCreateChat,
+            headers: {"Accept": "application/json"},
+            // PROBLEM
+            body: newChat)
+          .then((response) {
+            print("Signup:");
+            print('Response: ${response.statusCode}  Body:${response.body} ');
+
+            Map result = JSON.jsonDecode(response.body);
+            print("Map:   $result");
+            if(response.body == null) {
+              print("Chat não foi criado");
+            }
+            else {
+              print("funcionou");
+            }
+            })
+
+          .catchError((err) {
+            print(err.toString());
+            print('deu ruim');
+            ioClient.close();
+
+          });
+    }
 }

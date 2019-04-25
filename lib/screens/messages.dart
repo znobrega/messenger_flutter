@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
+import 'dart:io';
+import 'package:http/io_client.dart';
+import 'dart:convert' as JSON;
+
 class Messages extends StatefulWidget{
   final List<dynamic> _allMessages;
 
@@ -42,7 +46,7 @@ class _MessagesState extends State<Messages> {
         // });
         _allMessagesState.insert(0,
          Message(_allMessagesState[0].chat, _allMessagesState[0].to,
-         _allMessagesState[0].from, message,DateTime.now().toString()));
+         _allMessagesState[0].from, message, DateTime.now().toString()));
 
         _messageController.text = "";
       });
@@ -71,6 +75,7 @@ class _MessagesState extends State<Messages> {
 
   int countMessages(List<dynamic> _allMessages) {
     if(_allMessages == null) {
+      debugPrint("hellow");
       return 0;
     }
     return _allMessages.length;
@@ -124,6 +129,55 @@ class _MessagesState extends State<Messages> {
     }
     return Container();
   }
+
+  void createMessage(String to , String subject, String message) async {
+          HttpClient httpClient = new HttpClient()
+        ..badCertificateCallback =
+        ((X509Certificate cert, String host, int port) {
+          print("CERTIFICADO HTTP");
+          // tests that cert is self signed, correct subject and correct date(s)
+          return true;
+        });
+
+      IOClient ioClient = new IOClient(httpClient);
+      var urlCreateChat = 'https://192.168.0.39:8443/message/send';
+
+
+      Map<String, dynamic> newMessage = {
+     //   "sender_nickname": _currentUser.nickname, 
+        "text_message": message,
+        "subject": subject,
+        "to": to, 
+      };
+
+    
+      print("clicked");
+      ioClient
+          .post(
+            urlCreateChat,
+            headers: {"Accept": "application/json"},
+            // PROBLEM
+            body: newMessage)
+          .then((response) {
+            print("Signup:");
+            print('Response: ${response.statusCode}  Body:${response.body} ');
+
+            Map result = JSON.jsonDecode(response.body);
+            print("Map:   $result");
+              if(response.body == null) {
+                print("Chat não foi criado");
+              }
+              else {
+                print("funcionou");
+              }
+          })
+          .catchError((err) {
+            print(err.toString());
+            print('deu ruim');
+            ioClient.close();
+
+          });
+    }
   
 }
 

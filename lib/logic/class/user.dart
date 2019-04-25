@@ -1,43 +1,58 @@
 import './chat.dart';
-import './message.dart';
+
 
 class User {
-  String _name;
-  String _nickname;
-  String _password;
+  String _name="";
+  String _nickname="";
+  String _password="";
   String _creationDate;
   List<Chat> _chats;
+  static User _instance;
   
   //User(this._name, this._nickname, this._password, this._creationDate, this._chats);
-  User(this._name, this._nickname, this._chats);
+  _User(){}
   
-  String get name => _name;
+  static User getInstance(){
+    if(_instance== null){
+      _instance = new User();
+    }
+    return _instance;
+  }
+
+
   String get nickname => _nickname;
   List get chats => _chats;
   
   String get password => _password;
   String get creationDate => _creationDate;
 
-  set username(String username) {
+  void setusername(String username) {
     if(username.length < 20) {
       _nickname = username;
     }
   }
 
-  set password(String password) {
+  void setpassword(String password) {
     if(password.length < 15) {
       _password = password;
     }
   }
 
-  set creationDate(String creationDate) {
+  void setcreationDate(String creationDate) {
     _creationDate = creationDate;
   }
 
   void addChat(Chat c) {
     _chats.add(c);
   }
+
   
+  setAll(String username, String pass, String name){
+    setusername(username);
+    setpassword(pass);
+    _name=name;
+  }
+
   Map<String, dynamic> toMap() {
     var map = Map<String, dynamic>();
     map["username"] = _nickname;

@@ -6,10 +6,10 @@ import '../../models/user.dart';
 import 'dart:io';
 import 'package:http/io_client.dart';
 import 'dart:convert' as JSON;
-import 'package:http/http.dart' as http;
-import 'dart:async';
-import 'package:async/async.dart';
-import 'package:dio/dio.dart';
+// import 'package:http/http.dart' as http;
+// import 'dart:async';
+// import 'package:async/async.dart';
+// import 'package:dio/dio.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -283,15 +283,6 @@ class _LoginPageStates extends State<LoginPage> {
     
     if (_userControllerLogin.text.isNotEmpty &&
         _passwordControllerLogin.text.isNotEmpty) {
-          print("Clicked");
-      //User newUser = User( "a",_userControllerLogin.text, _passwordControllerLogin.text,
-      //   DateTime.now().toString(), []);
-      // Navigator.pushReplacement(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (BuildContext context) => Emails(newUser)));
-
-
 
       HttpClient httpClient = new HttpClient()
         ..badCertificateCallback =
@@ -310,22 +301,32 @@ class _LoginPageStates extends State<LoginPage> {
       login['password'] = _passwordControllerLogin.text;
 
       ioClient
-          .post(urlLogin,
+          .put(urlLogin,
           headers: {"Accept": "application/json"},
           body: login)
           .then((response) {
         print("Login:");
         print('Response: ${response.statusCode}  Body:${response.body} ');
-        //ioClient.close();
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (BuildContext context) =>
-        //       Emails(newUser)));
-           })
+
+        Map result = JSON.jsonDecode(response.body);
+        print("Map:   ${result["name"]}");
+        print("Map:   ${result["nickname"]}");
+        User newUser = User(result['name'], result['nickname'], []);
+
+        if( response.body.isNotEmpty ) {
+          debugPrint("usuario logado");
+          debugPrint(newUser.nickname);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) =>
+                Emails(result['name'], result['nickname'])));
+            }
+          }
+        )
           .catchError((err) {
-        print(err.toString());
-        print('deu ruim');
+            print(err.toString());
+            print('deu ruim');
       });
     }
   }
@@ -363,20 +364,21 @@ class _LoginPageStates extends State<LoginPage> {
             print('Response: ${response.statusCode}  Body:${response.body} ');
 
             Map result = JSON.jsonDecode(response.body);
-            print("Map:   $result");
+            print("Map:   ${result["name"]}");
+            print("Map:   ${result["nickname"]}");
 
-            if(result['loggedIn'] && false) {
-              User newUser = (result["name"], result['nickname'], []);
-              Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (BuildContext context) => Emails(newUser)));
-            }
+            // if(result['loggedIn'] && false) {
+            //   User newUser = (result["name"], result['nickname'], []);
+            //   Navigator.pushReplacement(context,
+            //     MaterialPageRoute(builder: (BuildContext context) => Emails(newUser)));
+            // }
 
 
         })
           .catchError((err) {
         print(err.toString());
-        print('deu ruim');
-            ioClient.close();
+        print('Não funcionou');
+            //ioClient.close();
 
       });
 
