@@ -102,7 +102,7 @@ class _NewEmailState extends State<NewEmail> {
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.next,
               controller: _messageController,
-              maxLines: 10,
+              maxLines: 5,
               
               style: textStyle,
               decoration: InputDecoration(
@@ -150,17 +150,18 @@ class _NewEmailState extends State<NewEmail> {
   void sendEmail(String to , String subject, String message) {
     var dateNow = DateTime.now();
     var formater = DateFormat('yyyy-MM-dd hh:mm');
-    var date = formater.format(dateNow);
-    
+    //var date = formater.format(dateNow);
+    var date = DateFormat.Hm().format(DateTime.now()).toString();
+    debugPrint("to: $to, subject: $subject, message: $message, date: ${DateFormat.Hm().format(DateTime.now()).toString()} ");
     Map<String, dynamic> email = {
       "from": "Carlos", 
       "to": to, 
       "subject": subject,
-      "dateEmail": date, 
+      "dateEmail": DateFormat.Hm().format(DateTime.now()).toString(), 
       "messages":[{
         "fromDialog": "Carlos", 
         "message": message, 
-        "date": DateTime.now().toString()
+        "date": DateFormat.Hm().format(DateTime.now()).toString()
         }],
     };
 
@@ -170,7 +171,7 @@ class _NewEmailState extends State<NewEmail> {
     else {
       _allEmails["emails"].insert(0, email);
     }
-    _currentUser.addChat(Chat(_currentUser,_currentUser, subject, [], date, message));
+    _currentUser.addChat(Chat(_currentUser, _currentUser, subject, [], date, message));
   }  
 
   void createChat(String to , String subject, String message) async {
@@ -212,7 +213,7 @@ class _NewEmailState extends State<NewEmail> {
             else {
               print("funcionou");
             }
-            })
+          })
 
           .catchError((err) {
             print(err.toString());

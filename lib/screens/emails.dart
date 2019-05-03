@@ -15,12 +15,13 @@ import 'package:http/http.dart' as http;
 
 class Emails extends StatefulWidget {
 
-  final String _name;
-  final String _nickname;
-  User _currentUser;
-  Emails(this._name, this._nickname) {
-    _currentUser = User(_name, _nickname, []);
-  }
+  //final String _name;
+  //final String _nickname;
+  final User _currentUser;
+  Emails(this._currentUser);
+  //{
+    //_currentUser = User(_name, _nickname, []);
+  //}
 
   @override
   State<StatefulWidget> createState() => _EmailsState(_currentUser);
@@ -32,11 +33,17 @@ class _EmailsState extends State<Emails> {
   //final String _nameState;
   //final String _nicknameState;
   _EmailsState(this._currentUserState);
+  //_currentUser.addChat(Chat(_currentUserState, _currentUserState, "Hello", [], date, "message"));
   int listCount;
-
+  
+  void initState() {
+    _currentUserState.addChat(Chat(_currentUserState, _currentUserState, "slack", [], DateFormat.Hm().format(DateTime.now()).toString(), "Hi"));
+  }
 
   Map<String, dynamic> allData = {
     "username": "Carlos",
+    "name": "Nobrega",
+    "nickname": "Alves",
     "emails": [],
   };
 
@@ -49,7 +56,7 @@ class _EmailsState extends State<Emails> {
       } else {
         debugPrint(_currentUserState.name);
         debugPrint(_currentUserState.nickname);
-        getEmails();
+        //getEmails();
       }
     return Scaffold(
       appBar: AppBar(
@@ -117,16 +124,12 @@ class _EmailsState extends State<Emails> {
           elevation: 2.0,
           child: ListTile(
             leading: Text(to.substring(0,1)),
-            title: Text("$to ${allData['emails'][position]["dateEmail"]} ", 
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                ),
-              ),
+            title: Text("$to ${allData['emails'][position]["dateEmail"]} ", style: TextStyle(fontWeight: FontWeight.w500,),),
             subtitle: Text("${allData['emails'][position]["subject"]}"),
             onTap: () {
               Navigator.push(context,
               MaterialPageRoute(
-                builder: (context) => Messages(allData["emails"][position]["messages"])),
+                builder: (context) => Messages(allData["emails"][position]["messages"], allData["emails"][position])),
               );
             },
           ),
@@ -154,12 +157,13 @@ class _EmailsState extends State<Emails> {
       itemBuilder: (BuildContext context, int position) {
         
         String to = _currentUserState.chats[position].to.nickname;
-        debugPrint(to);
+        String date = _currentUserState.chats[position].date;
         return Card(
           color: Colors.white,
           elevation: 2.0,
           child: ListTile(
-            leading: Text(to.substring(0,1)),
+            //leading: Text(to.substring(0,1)),
+            leading: Text("${to.substring(0,1)}"),
             title: Text("$to ${_currentUserState.chats[position].date} ", 
               style: TextStyle(
                 fontWeight: FontWeight.w500,
@@ -169,7 +173,7 @@ class _EmailsState extends State<Emails> {
             onTap: () {
               Navigator.push(context,
               MaterialPageRoute(
-                builder: (context) => Messages(_currentUserState.chats[position].messages)),
+                builder: (context) => Messages(_currentUserState.chats[position].messages, _currentUserState.chats[position])),
               );
             },
           ),

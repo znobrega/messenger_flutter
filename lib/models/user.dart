@@ -9,6 +9,7 @@ class User {
   List<Chat> _chats;
   
   //User(this._name, this._nickname, this._password, this._creationDate, this._chats);
+  //User(this._name, this._nickname, this._chats);
   User(this._name, this._nickname, this._chats);
   
   String get name => _name;

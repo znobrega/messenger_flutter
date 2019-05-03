@@ -164,7 +164,8 @@ class _LoginPageStates extends State<LoginPage> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25.0)),
                             onPressed: () {
-                              submitLogin();
+                              submitLoginNoServer();
+                              //submitLogin();
                               //Navigator.pushReplacement(context,
                                  // MaterialPageRoute(
                                     //  builder: (BuildContext context) =>
@@ -266,7 +267,7 @@ class _LoginPageStates extends State<LoginPage> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25.0)),
                             onPressed: () {
-                              submitSign();
+                              //submitSign();
                             },
 
                           )
@@ -311,16 +312,17 @@ class _LoginPageStates extends State<LoginPage> {
         Map result = JSON.jsonDecode(response.body);
         print("Map:   ${result["name"]}");
         print("Map:   ${result["nickname"]}");
-        User newUser = User(result['name'], result['nickname'], []);
+        //User newUser = User(result['name'], result['nickname'], []);
 
         if( response.body.isNotEmpty ) {
           debugPrint("usuario logado");
-          debugPrint(newUser.nickname);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) =>
-                Emails(result['name'], result['nickname'])));
+          //debugPrint(newUser.nickname);
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (BuildContext context) =>
+          //       //Emails(result['name'], result['nickname'])
+          //       ));
             }
           }
         )
@@ -391,5 +393,15 @@ class _LoginPageStates extends State<LoginPage> {
     }
   }
 
-
+  submitLoginNoServer() {
+    if( _userControllerLogin.text.isNotEmpty ) {
+      debugPrint("usuario logado");
+      //debugPrint(newUser.nickname);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) =>
+            Emails(User(_userControllerLogin.text, _userControllerLogin.text, []))));
+    }
+  }
 }

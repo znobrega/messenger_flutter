@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
+import '../models/chat.dart';
+
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'dart:io';
 import 'package:http/io_client.dart';
@@ -7,24 +11,47 @@ import 'dart:convert' as JSON;
 
 class Messages extends StatefulWidget{
   final List<dynamic> _allMessages;
-
-  Messages(this._allMessages);
+  final Chat _chat;
+  Messages(this._allMessages, this._chat);
+  
   
   @override
-  State<StatefulWidget> createState() => _MessagesState(_allMessages);
+  State<StatefulWidget> createState() => _MessagesState(_allMessages, _chat);
 }
 
 class _MessagesState extends State<Messages> {
 
   final List<dynamic> _allMessagesState;
-  _MessagesState(this._allMessagesState);
+  final Chat _chatState;
+  _MessagesState(this._allMessagesState, this._chatState);
   TextEditingController _messageController = TextEditingController();
+  //Intl.defaultLocale = 'pt_BR';
+  //initializeDateFormatting();
+  
+    @override
+  void initState() {
+    _allMessagesState.add(Message(_chatState, _chatState.to, _chatState.from, "Hello", DateTime.utc(2019, 4, 20, 20, 18).toString()));
+    _allMessagesState.insert(0,
+         Message(_allMessagesState[0].chat, _allMessagesState[0].to,
+         _allMessagesState[0].from, "My", DateTime.utc(2019, 4, 30, 20, 18).toString()));
+    _allMessagesState.insert(0,
+         Message(_allMessagesState[0].chat, _allMessagesState[0].to,
+         _allMessagesState[0].from, "Friend", DateTime.utc(2019, 5, 1, 10, 54).toString()));
+    _allMessagesState.insert(0,
+         Message(_allMessagesState[0].chat, _allMessagesState[0].to,
+         _allMessagesState[0].from, "Hisashi", DateTime.utc(2019, 5, 2, 15, 25).toString()));
+    _allMessagesState.insert(0,
+         Message(_allMessagesState[0].chat, _allMessagesState[0].to,
+         _allMessagesState[0].from, "Buri", DateTime.now().toString()));
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Nomes"),
+        title: Text("Chat"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -38,35 +65,39 @@ class _MessagesState extends State<Messages> {
   void newMessage(String message) {
     if(message.isNotEmpty) {
       setState(() {
-        debugPrint("setstate");
+        
         // _allMessagesState.insert(0, {
         //   "fromDialog": "Carlos",
         //   "message": message,
         //   "date": DateTime.now().toString(),
         // });
-        _allMessagesState.insert(0,
+        if(_allMessagesState.length == 0 ) {
+          debugPrint("me ajuda 100or");
+          _allMessagesState.add(Message(_chatState, _chatState.to, _chatState.from, message, DateTime.now().toString()));
+        } else {
+          _allMessagesState.insert(0,
          Message(_allMessagesState[0].chat, _allMessagesState[0].to,
          _allMessagesState[0].from, message, DateTime.now().toString()));
 
+        } 
+        
         _messageController.text = "";
       });
     }
   } 
 
   Widget messageList() {
+    debugPrint("hellow2");
     return ListView.builder(
         reverse: true,
         itemCount: countMessages(_allMessagesState),
         itemBuilder: (BuildContext context, int position) {
-          return Column( 
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
             children: [ 
-              timeStamp(_allMessagesState, position),
-              Card(
-              child: ListTile(
-                title: Text("${_allMessagesState[position].from.username}"),
-                subtitle: Text("${_allMessagesState[position].message}"),
-                ),
-              )
+              Center(child: timeStamp(_allMessagesState, position),),
+              message(_allMessagesState, position),
+            
             ]
           );
         },
@@ -75,7 +106,6 @@ class _MessagesState extends State<Messages> {
 
   int countMessages(List<dynamic> _allMessages) {
     if(_allMessages == null) {
-      debugPrint("hellow");
       return 0;
     }
     return _allMessages.length;
@@ -85,7 +115,11 @@ class _MessagesState extends State<Messages> {
     return Column(
       children: <Widget>[
         Flexible(
-          child: messageList(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            child: messageList(),
+            
+            )
         ),
         Divider(
           height: 1.0,
@@ -114,18 +148,57 @@ class _MessagesState extends State<Messages> {
   }
 
   Widget timeStamp(List _allMessagesState, int position) {
-    var date = DateTime.now();
+    Intl.defaultLocale = 'pt_BR';
+    initializeDateFormatting();
+    var date = DateFormat.yMMMMd("pt_BR").format(DateTime.parse(_allMessagesState[position].date));
+    //DateFormat.yMMMMd("pt_BR").format(DateTime.now())
     debugPrint("Position: $position, ${_allMessagesState.length}");
     if(_allMessagesState.length == position+1) {
-      return ListTile(title: Text( '$date'),);
+      return Column( children: <Widget>[Text( '$date'), Divider(height: 10.0,)]);
     }
-    else if(position > 0){
-      int newMessageDay =  int.parse(_allMessagesState[position].date.substring(5,7));
-      int oldMessageDay = int.parse(_allMessagesState[position-1].date.substring(5,7));
-
+    else if(position >= 0){
+      int newMessageDay =  int.parse(_allMessagesState[position].date.substring(8,10));
+      int oldMessageDay = int.parse(_allMessagesState[position+1].date.substring(8,10));
+      debugPrint(" newDay:$newMessageDay  oldDay: $oldMessageDay");
+      debugPrint("${_allMessagesState[position].date.substring(8,10)}");
       if(newMessageDay != oldMessageDay) {
-        return ListTile(title: Text( '$date'),);
+        return Column( children: <Widget>[Text( '$date'), Divider(height: 10.0,)]);
       }
+    }
+    return Container();
+  }
+
+  Widget message(List messageList, int position) {
+    debugPrint("${messageList[position].from.name}");
+    int newMessageDay =  int.parse(_allMessagesState[position].date.substring(8,10));
+    int oldMessageDay = newMessageDay;
+    if(position < _allMessagesState.length-1) {
+      oldMessageDay = int.parse(_allMessagesState[position+1].date.substring(8,10));
+
+    } 
+
+    if (_allMessagesState.length == position+1
+        || position == 0 && messageList.length > 0 && messageList[position].from.name != messageList[position+1].from.name
+        || newMessageDay != oldMessageDay) {
+      return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                children: <Widget>[
+                  Text("${_allMessagesState[position].from.name}", style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text(" ${DateFormat.Hm().format(DateTime.parse(_allMessagesState[position].date))}",
+                      style: TextStyle(fontWeight: FontWeight.w300, fontSize: 15.0),
+                      ),
+                  //Text(" ${_allMessagesState[position].date}"),
+                ],
+              ),
+              Text("${_allMessagesState[position].message}"),],);
+    } else if (position > 0 && messageList.length > 0 && messageList[position].from.name == messageList[position-1].from.name) {
+      return Text("${_allMessagesState[position].message}");
+    } else if (position == 0 && messageList.length > 0 && messageList[position].from.name == messageList[position+1].from.name){
+      debugPrint("Ta chegando so no final");
+      return Text("${_allMessagesState[position].message}");
     }
     return Container();
   }

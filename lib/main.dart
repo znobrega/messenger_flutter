@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         hintColor: Colors.black54,
         fontFamily: 'Montserrat',
         textTheme: TextTheme(
-          body1: TextStyle(fontSize: 20.0, fontFamily: 'Montserrat',color: Colors.white,decorationColor: Colors.white),
+          body1: TextStyle(fontSize: 20.0, fontFamily: 'Montserrat',color: Colors.black, decorationColor: Colors.white),
           title: TextStyle(color: Colors.white)
         )
         //primarySwatch: Colors.teal,
